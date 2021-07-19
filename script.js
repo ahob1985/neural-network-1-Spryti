@@ -7,8 +7,9 @@ let textDiv;
 let textP;
 let buttonDiv;
 let trainButton;
-let notesRadio;
+let saveDataButton;
 let radioDiv;
+let notesRadio;
 
 // Global ML Variables
 let model;
@@ -18,18 +19,14 @@ let wave;
 let notes;
 
 function setup() {
-  //canvas
   canvasDiv = createDiv();
   canvas = createCanvas(640, 480);
-  canvas.parent(canvasDiv);
   canvas.mousePressed(canvasClicked);
-  //text
+  canvas.parent(canvasDiv);
   textDiv = createDiv();
   textP = createP("Step 1: Data Collection");
   textP.parent(textDiv);
-  //build the buttons 
   buildButtons();
-  //initialize "state" to "collection"
   state = "collection";
   notes = {
     C: 261.6256,
@@ -62,11 +59,10 @@ function buildButtons() {
   notesRadio.option("G");
   notesRadio.selected("C");
   notesRadio.parent(radioDiv);
-  //creat the training button 
   buttonDiv = createDiv();
   trainButton = createButton("Train Model");
-  trainButton.parent(buttonDiv);
   trainButton.mousePressed(trainModel);
+  trainButton.parent(buttonDiv);
 }
 
 function createMusicSystem() {
@@ -98,11 +94,10 @@ function whileTraining(epoch, loss) {
 
 function finishedTraining() {
   state = "prediction";
-  textP.html("step 3: Predition");
+  textP.html("Step 3: Prediction");
 }
 
 function drawNote(note, noteColor, ellipseColor) {
-  //draw ellipse
   stroke(0);
   fill(ellipseColor);
   ellipse(mouseX, mouseY, 24);
@@ -110,6 +105,8 @@ function drawNote(note, noteColor, ellipseColor) {
   noStroke();
   textAlign(CENTER, CENTER);
   text(note, mouseX, mouseY);
+  wave.freq(notes[note]);
+  env.play();
 }
 
 function canvasClicked() {
@@ -118,16 +115,12 @@ function canvasClicked() {
     y: mouseY
   };
   if(state === "collection") {
-    console.log("state === collection");
     let targetLabel = notesRadio.value();
     let target = {
       label: targetLabel
     };
     model.addData(inputs, target);
     drawNote(targetLabel, "black", "white");
-    wave.freq(notes[targetLabel]);
-    env.play();
-
   } else if(state === "prediction") {
     model.classify(inputs, gotResults);
   }
@@ -135,11 +128,9 @@ function canvasClicked() {
 
 function gotResults(error, results) {
   if(error) {
-    console.error(error)
+    console.error(error);
   } else {
     let label = results[0].label;
-    drawNote(label, "white", blue);
-    wave.freq(notes[label]);
-    env.play();
+    drawNote(label, "white", "blue");
   }
 }
